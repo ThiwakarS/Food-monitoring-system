@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IoT Monitoring Device</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        #map { height: 400px; }
+        .sensor-data { margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+    <h1>IoT Monitoring Device</h1>
+    <div id="map"></div>
+    <div id="sensor-data">
+        <div class="sensor-data">Temperature DS18B20: <span id="temp-ds18b20">-</span> °C</div>
+        <div class="sensor-data">Temperature DHT11: <span id="temp-dht11">-</span> °C</div>
+        <div class="sensor-data">Humidity: <span id="humidity">-</span> %</div>
+        <div class="sensor-data">Air Quality: <span id="air-quality">-</span> ppm</div>
+    </div>
+
+    <script>
+        var map = L.map('map').setView([0, 0], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+        var marker = L.marker([0, 0]).addTo(map);
+
+        var socket = io();
+
+        socket.on('sensor_update', function(data) {
+            document.getElementById('temp-ds18b20').textContent = data.ds18b20;
+            document.getElementById('temp-dht11').textContent = data.dht11;
+            document.getElementById('humidity').textContent = data.humidity;
+            document.getElementById('air-quality').textContent = data.air_quality;
+
+            var newLatLng = new L.LatLng(data.latitude, data.longitude);
+            marker.setLatLng(newLatLng);
+            map.setView(newLatLng);
+        });
+    </script>
+</body>
+</html>
